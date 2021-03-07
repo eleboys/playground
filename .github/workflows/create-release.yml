@@ -1,0 +1,54 @@
+name: Create Release Branch
+on:
+    workflow_dispatch:
+        inputs:
+            prefix:
+                description: "Type (release | hotfix)"
+                default: release
+                required: true
+jobs:
+    branching:
+        if: github.event.inputs.prefix == 'release' || github.event.inputs.prefix == 'hotfix'
+        runs-on: ubuntu-latest
+        name: Create Branch
+        steps:
+            - name: Checkout alpha to create RELEASE
+              uses: actions/checkout@v2
+              if: github.event.inputs.prefix == 'release'
+              with:
+                ref: "alpha"
+
+            - name: Checkout master to create HOTFIX
+              uses: actions/checkout@v2
+              if: github.event.inputs.prefix == 'hotfix'
+              with:
+                ref: "master"
+
+            - name: Install Node
+              uses: actions/setup-node@v1
+              with:
+                  node-version: "10.17.0"
+
+            - name: Create new branch
+              run: |
+                git config --global user.name 'Github Robot'
+                git config --global user.email '<>'
+                git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
+            
+            - name: Increase version minor
+              if: github.event.inputs.prefix == 'release'
+              run: |
+                npm --no-git-tag-version version minor
+
+            - name: Increase version patch
+              if: github.event.inputs.prefix == 'hotfix'
+              run: |
+                npm --no-git-tag-version version patch
+            
+            - name: Push to origin
+              run: |
+                APP_VERSION=$(node -p "require('./package').version")
+                git checkout -b release/v$APP_VERSION
+                git add .
+                git commit -m "Bumped App Version to $APP_VERSION"
+                git push --set-upstream origin release/v$APP_VERSION

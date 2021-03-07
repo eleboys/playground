@@ -1,0 +1,34 @@
+name: Create Pull-Requests
+on:
+  workflow_dispatch: {}
+jobs:
+  create-pr:
+    runs-on: ubuntu-latest
+    name: Create PRs
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v2
+
+      - name: Create PR to master    
+        uses: repo-sync/pull-request@v2
+        with:
+          destination_branch: "master"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          pr_title: Merge ${{ github.ref }} into master
+          pr_body: Merge ${{ github.ref }} into master
+
+      - name: Create PR to alpha    
+        uses: repo-sync/pull-request@v2
+        with:
+          destination_branch: "alpha"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          pr_title: Merge ${{ github.ref }} into alpha
+          pr_body: Merge ${{ github.ref }} into alpha
+
+      - name: Create PR to develop    
+        uses: repo-sync/pull-request@v2
+        with:
+          destination_branch: "develop"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          pr_title: Merge ${{ github.ref }} into develop
+          pr_body: Merge ${{ github.ref }} into develop
