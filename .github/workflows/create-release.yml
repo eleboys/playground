@@ -45,15 +45,16 @@ jobs:
               run: |
                 npm --no-git-tag-version version patch
                 APP_VERSION=$(node -p "require('./package').version")
+                echo "app_version=$APP_VERSION" >> $GITHUB_ENV
             
             - name: Update readme file
               run: |
-                sed --regexp-extended 's/\*\*release\/\S+\*\*/**release\/v'"$APP_VERSION"'**/' readme.md >> readme.md
+                sed --regexp-extended 's/\*\*release\/\S+\*\*/**release\/v${{ env.app_version }}**/' readme.md >> readme.md
                 sed --regexp-extended 's/created at \*.+\*/created at *'"$(TZ=Europe/Berlin date)"'*/' readme.md >> readme.md
                 
             - name: Push to origin
               run: |
-                git checkout -b release/v$APP_VERSION
+                git checkout -b release/v${{ env.app_version }}
                 git add .
-                git commit -m "Bumped App Version to $APP_VERSION"
-                git push --set-upstream origin release/v$APP_VERSION
+                git commit -m "Bumped App Version to ${{ env.app_version }}"
+                git push --set-upstream origin release/v${{ env.app_version }}
