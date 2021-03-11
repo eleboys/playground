@@ -44,10 +44,15 @@ jobs:
               if: github.event.inputs.prefix == 'hotfix'
               run: |
                 npm --no-git-tag-version version patch
+                APP_VERSION=$(node -p "require('./package').version")
             
+            - name: Update readme file
+              run: |
+                sed --regexp-extended 's/\*\*release\/\S+\*\*/**release\/v'"$APP_VERSION"'**/' readme.md >> readme.md
+                sed --regexp-extended 's/created at \*.+\*/created at *'"$(TZ=Europe/Berlin date)"'*/' readme.md >> readme.md
+                
             - name: Push to origin
               run: |
-                APP_VERSION=$(node -p "require('./package').version")
                 git checkout -b release/v$APP_VERSION
                 git add .
                 git commit -m "Bumped App Version to $APP_VERSION"
