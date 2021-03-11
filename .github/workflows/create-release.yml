@@ -39,7 +39,9 @@ jobs:
               if: github.event.inputs.prefix == 'release'
               run: |
                 npm --no-git-tag-version version minor
-
+                APP_VERSION=$(node -p "require('./package').version")
+                echo "app_version=$APP_VERSION" >> $GITHUB_ENV
+                
             - name: Increase version patch
               if: github.event.inputs.prefix == 'hotfix'
               run: |
